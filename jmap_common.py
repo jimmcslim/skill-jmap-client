@@ -199,13 +199,13 @@ def load_jmap_credentials() -> tuple[str, str]:
     load_dotenv()
 
     host = os.getenv('JMAP_HOST')
-    api_token = os.getenv('JMAP_API_TOKEN')
+    api_token = os.getenv('JMAP_API_TOKEN_RO')
 
     if not all([host, api_token]):
         print("Error: Missing JMAP credentials in .env file")
         print("\nRequired environment variables:")
-        print("  JMAP_HOST         - JMAP server hostname (e.g., api.fastmail.com)")
-        print("  JMAP_API_TOKEN    - API token or password")
+        print("  JMAP_HOST            - JMAP server hostname (e.g., api.fastmail.com)")
+        print("  JMAP_API_TOKEN_RO    - Read-only API token")
         print("\nCreate a .env file with these variables.")
         sys.exit(1)
 

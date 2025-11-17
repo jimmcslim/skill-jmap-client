@@ -23,7 +23,7 @@ from jmap_common import (
 )
 
 
-def display_emails(emails: List[Dict[str, Any]], folder_name: str) -> None:
+def display_emails(emails: List[Dict[str, Any]], folder_name: str, show_ids: bool = False) -> None:
     """Display emails in a readable format."""
     if not emails:
         print(f"No emails found in {folder_name}.")
@@ -57,6 +57,9 @@ def display_emails(emails: List[Dict[str, Any]], folder_name: str) -> None:
         status_str = ' | '.join(status) if status else 'READ'
 
         print(f"[{idx}] {subject}")
+        if show_ids:
+            email_id = email.get('id', 'N/A')
+            print(f"    ID: {email_id}")
         print(f"    From: {from_str}")
         print(f"    Date: {received_at}")
         print(f"    Status: {status_str}")
@@ -105,6 +108,11 @@ Examples:
         default=10,
         help='Maximum number of emails to retrieve (default: 10)'
     )
+    parser.add_argument(
+        '--show-ids',
+        action='store_true',
+        help='Show email IDs in the output'
+    )
     args = parser.parse_args()
 
     # Load credentials
@@ -145,7 +153,7 @@ Examples:
 
     # Get and display emails
     emails = client.get_emails(mailbox_id=mailbox_id, limit=args.limit)
-    display_emails(emails, mailbox_name)
+    display_emails(emails, mailbox_name, show_ids=args.show_ids)
 
 
 if __name__ == "__main__":

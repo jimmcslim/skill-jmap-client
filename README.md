@@ -17,6 +17,9 @@ The skill is split into focused, single-purpose scripts:
 - **`jmap_common.py`**: Shared JMAP client wrapper using the `jmapc` library
 - **`jmap_list_folders.py`**: Browse folder hierarchy
 - **`jmap_list_emails.py`**: List emails from folders
+- **`jmap_get_email.py`**: Retrieve full details of a specific email by ID
+- **`jmap_create_folder.py`**: Create new subfolders in PARA parent folders
+- **`jmap_archive_folder.py`**: Move folders from projects/areas/resources to archives
 
 The implementation uses the [`jmapc`](https://github.com/smkent/jmapc) Python library, which provides a robust, type-safe interface to JMAP servers.
 
@@ -34,19 +37,25 @@ Edit `.env` and add your JMAP server details:
 
 ```env
 JMAP_HOST=api.fastmail.com
-JMAP_API_TOKEN=your-api-token
+JMAP_API_TOKEN_RO=your-read-only-token
+JMAP_API_TOKEN_RW=your-read-write-token
 ```
 
 **Note:** The hostname should not include `https://` - just the domain name.
+
+**Tokens:**
+- `JMAP_API_TOKEN_RO`: Read-only token for listing folders and emails
+- `JMAP_API_TOKEN_RW`: Read-write token for creating folders and archiving
 
 #### Getting API Tokens
 
 **For Fastmail:**
 1. Log in to Fastmail
 2. Go to Settings → Password & Security → App Passwords
-3. Click "New App Password"
-4. Give it a name (e.g., "JMAP Script")
-5. Copy the generated token to your `.env` file
+3. Create two app passwords:
+   - One with read-only access (for general email viewing)
+   - One with read-write access (for folder creation and modifications)
+4. Copy the generated tokens to your `.env` file as `JMAP_API_TOKEN_RO` and `JMAP_API_TOKEN_RW`
 
 **For other JMAP providers:**
 Consult your provider's documentation for API token generation.
@@ -85,6 +94,64 @@ uv run jmap_list_emails.py --folder "100_projects" --limit 20
 uv run jmap_list_emails.py --folder "200_areas"
 ```
 
+### Get Full Email Details
+
+```bash
+# Get complete details of a specific email by ID
+uv run jmap_get_email.py M123abc456
+
+# Output raw JSON for processing
+uv run jmap_get_email.py --json M123abc456
+```
+
+The email detail view shows:
+- All metadata (ID, thread ID, size, dates)
+- Complete address fields (From, To, Cc, Bcc, Reply-To)
+- Status flags (read/unread, flagged, draft, answered)
+- Full email body (both text and HTML parts)
+- Complete headers
+- Attachment list with sizes and types (does not download files)
+
+### Create Folder
+
+```bash
+# Create a new project folder
+uv run jmap_create_folder.py --parent 100_projects --name "2025-Q1_website-redesign"
+
+# Create a new area folder
+uv run jmap_create_folder.py --parent 200_areas --name "Team Management"
+
+# Create a new resource folder
+uv run jmap_create_folder.py --parent 300_resources --name "Design Templates"
+```
+
+**Note:** This script only supports creating subfolders in the PARA parent folders: `100_projects`, `200_areas`, or `300_resources`. It requires the read-write API token (`JMAP_API_TOKEN_RW`).
+
+### Archive Folder
+
+```bash
+# Archive a completed project
+uv run jmap_archive_folder.py "2024-Q4_website-redesign"
+
+# Archive an area or resource
+uv run jmap_archive_folder.py "Old Team Management"
+
+# Preview the archive operation without making changes
+uv run jmap_archive_folder.py --dry-run "Project Name"
+
+# Skip confirmation prompt (auto-confirm)
+uv run jmap_archive_folder.py --yes "Project Name"
+uv run jmap_archive_folder.py -y "Project Name"
+```
+
+The archive script will:
+1. Search for the folder in `100_projects`, `200_areas`, and `300_resources` (one level deep)
+2. Show details about the folder (location, email counts)
+3. Ask for confirmation (use `--yes` or `-y` to skip, or `--dry-run` to preview)
+4. Move the folder and all its contents to `400_archives`
+
+**Note:** This script requires the read-write API token (`JMAP_API_TOKEN_RW`) and the `400_archives` folder must exist.
+
 ### Using with Claude Code
 
 Simply ask Claude:
@@ -92,6 +159,8 @@ Simply ask Claude:
 - "What are my PARA folders?" → Shows PARA structure
 - "List emails from my projects folder" → Shows emails from 100_projects
 - "Fetch my recent emails" → Shows Inbox emails
+- "Create a project folder called 2025-Q2_mobile-app" → Creates new folder in 100_projects
+- "Archive the folder 2024-Q4_website-redesign" → Moves folder to 400_archives
 
 ## Requirements
 
