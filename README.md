@@ -93,6 +93,15 @@ uv run jmap_list_emails.py --folder "100_projects" --limit 20
 
 # List emails from PARA areas
 uv run jmap_list_emails.py --folder "200_areas"
+
+# Show email IDs (useful for filing or getting full details)
+uv run jmap_list_emails.py --show-ids
+
+# Output in JSON format
+uv run jmap_list_emails.py --json
+
+# JSON output with email IDs included
+uv run jmap_list_emails.py --folder Inbox --json --show-ids
 ```
 
 ### Get Full Email Details
