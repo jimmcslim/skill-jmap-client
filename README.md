@@ -200,7 +200,7 @@ Simply ask Claude:
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.12+
 - `uv` package manager (https://github.com/astral-sh/uv)
 
 Dependencies are automatically managed via PEP 723 inline script metadata:
