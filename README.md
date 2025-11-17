@@ -18,6 +18,7 @@ The skill is split into focused, single-purpose scripts:
 - **`jmap_list_folders.py`**: Browse folder hierarchy
 - **`jmap_list_emails.py`**: List emails from folders
 - **`jmap_get_email.py`**: Retrieve full details of a specific email by ID
+- **`jmap_file_email.py`**: File (move or copy) emails to PARA subfolders
 - **`jmap_create_folder.py`**: Create new subfolders in PARA parent folders
 - **`jmap_archive_folder.py`**: Move folders from projects/areas/resources to archives
 
@@ -112,6 +113,31 @@ The email detail view shows:
 - Complete headers
 - Attachment list with sizes and types (does not download files)
 
+### File Email
+
+```bash
+# Move an email to a project folder
+uv run jmap_file_email.py M123abc456 "2025-Q1_website-redesign"
+
+# Move an email to an area folder
+uv run jmap_file_email.py M123abc456 "Team Management"
+
+# Copy an email to a resource folder (keeps in original location)
+uv run jmap_file_email.py --copy M123abc456 "Design Templates"
+
+# Skip confirmation prompt (auto-confirm)
+uv run jmap_file_email.py --yes M123abc456 "Project Name"
+uv run jmap_file_email.py -y M123abc456 "Project Name"
+```
+
+The file script will:
+1. Search for the folder in `100_projects`, `200_areas`, and `300_resources` (one level deep)
+2. Show details about the email (subject, sender, current location)
+3. Ask for confirmation (use `--yes` or `-y` to skip)
+4. Move the email to the target folder (or copy with `--copy`)
+
+**Note:** By default, the email is **moved** (removed from its current location). Use `--copy` to keep the email in its original location as well. This script requires the read-write API token (`JMAP_API_TOKEN_RW`).
+
 ### Create Folder
 
 ```bash
@@ -159,6 +185,7 @@ Simply ask Claude:
 - "What are my PARA folders?" → Shows PARA structure
 - "List emails from my projects folder" → Shows emails from 100_projects
 - "Fetch my recent emails" → Shows Inbox emails
+- "File email M123abc to my website-redesign project" → Moves email to project folder
 - "Create a project folder called 2025-Q2_mobile-app" → Creates new folder in 100_projects
 - "Archive the folder 2024-Q4_website-redesign" → Moves folder to 400_archives
 
