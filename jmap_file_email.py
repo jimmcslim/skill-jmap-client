@@ -50,10 +50,15 @@ def load_jmap_credentials_rw() -> tuple[str, str]:
     return host, api_token
 
 
-def find_folder_in_para(client: JMAPClient, folder_name: str) -> Optional[Dict[str, Any]]:
+def find_folder_in_para(client: JMAPClient, folder_name: str, max_depth: Optional[int] = None) -> Optional[Dict[str, Any]]:
     """
     Search for a folder by name in the PARA structure.
-    Searches one level deep in 100_projects, 200_areas, and 300_resources.
+    Searches in 100_projects, 200_areas, and 300_resources up to max_depth levels.
+
+    Args:
+        client: JMAPClient instance
+        folder_name: Name of the folder to search for
+        max_depth: Maximum depth to search (None = unlimited, 1 = direct children only)
 
     Returns the folder if found, None otherwise.
     """
@@ -71,19 +76,39 @@ def find_folder_in_para(client: JMAPClient, folder_name: str) -> Optional[Dict[s
         if mb['name'] in para_parents:
             para_parents[mb['name']] = mb['id']
 
-    # Search for the folder name in children of each PARA parent
+    # Helper function to recursively search descendants
+    def search_descendants(parent_id: str, current_depth: int, para_name: str) -> Optional[Dict[str, Any]]:
+        """Recursively search descendants of a given parent."""
+        # Check depth limit
+        if max_depth is not None and current_depth > max_depth:
+            return None
+
+        # Find all children of this parent
+        for mb in all_mailboxes:
+            parent_id_mb = mb.get('parentId')
+            if parent_id_mb == parent_id:
+                # Check if this is the folder we're looking for
+                if mb['name'] == folder_name:
+                    mb['paraParent'] = para_name
+                    mb['paraParentId'] = para_parents[para_name]
+                    return mb
+
+                # Recursively search this child's descendants
+                result = search_descendants(mb['id'], current_depth + 1, para_name)
+                if result:
+                    return result
+
+        return None
+
+    # Search for the folder name in each PARA parent's descendants
     for para_name, para_id in para_parents.items():
         if para_id is None:
             continue
 
-        # Find all children of this PARA folder
-        for mb in all_mailboxes:
-            parent_id = mb.get('parentId')
-            if parent_id == para_id and mb['name'] == folder_name:
-                # Found it!
-                mb['paraParent'] = para_name
-                mb['paraParentId'] = para_id
-                return mb
+        # Search descendants starting at depth 1
+        result = search_descendants(para_id, 1, para_name)
+        if result:
+            return result
 
     return None
 
@@ -202,10 +227,11 @@ Examples:
   %(prog)s abc123 "2025-Q1_website-redesign"     # Move email to project folder
   %(prog)s abc123 "Team Management"              # Move email to area folder
   %(prog)s abc123 "Design Templates" --copy      # Copy email to resources folder
+  %(prog)s abc123 "Archived" --max-depth 2       # Search up to 2 levels deep
 
 The script will:
 1. Search for the folder in 100_projects, 200_areas, and 300_resources
-2. Only search immediate subfolders (one level deep)
+2. Search recursively through the entire hierarchy (unless --max-depth is specified)
 3. Move the email to the found folder (or copy with --copy flag)
 
 By default, the email is MOVED (removed from current location).
@@ -231,6 +257,12 @@ Use --copy to keep the email in its current location as well.
         '--yes', '-y',
         action='store_true',
         help='Skip confirmation prompt and proceed with filing'
+    )
+    parser.add_argument(
+        '--max-depth',
+        type=int,
+        default=None,
+        help='Maximum depth to search in PARA folders (default: unlimited)'
     )
     args = parser.parse_args()
 
@@ -282,18 +314,24 @@ Use --copy to keep the email in its current location as well.
 
     # Search for the target folder
     print(f"Searching for folder '{args.folder_name}' in PARA structure...")
-    print("  Searching: 100_projects, 200_areas, 300_resources (one level deep)")
+    depth_msg = f"max depth: {args.max_depth}" if args.max_depth is not None else "unlimited depth"
+    print(f"  Searching: 100_projects, 200_areas, 300_resources ({depth_msg})")
     print()
 
-    target_folder = find_folder_in_para(client, args.folder_name)
+    target_folder = find_folder_in_para(client, args.folder_name, max_depth=args.max_depth)
 
     if not target_folder:
         print(f"Error: Folder '{args.folder_name}' not found")
-        print("\nSearched in immediate subfolders of:")
+        if args.max_depth is not None:
+            print(f"\nSearched up to {args.max_depth} level(s) deep in:")
+        else:
+            print("\nSearched all descendants of:")
         print("  - 100_projects")
         print("  - 200_areas")
         print("  - 300_resources")
         print("\nUse jmap_list_folders.py to see available folders")
+        if args.max_depth is not None:
+            print(f"Or try without --max-depth to search the entire hierarchy")
         sys.exit(1)
 
     target_id = target_folder['id']
