@@ -39,21 +39,37 @@ class TestLoadJMAPCredentialsRW:
 
         assert host == 'api.example.com'
 
-    def test_load_credentials_missing_host(self, monkeypatch, mock_load_dotenv):
+    def test_load_credentials_missing_host(self, mock_load_dotenv):
         """Test error when JMAP_HOST is missing."""
-        monkeypatch.delenv('JMAP_HOST', raising=False)
-        monkeypatch.setenv('JMAP_API_TOKEN_RW', 'test_token')
+        with patch('os.getenv') as mock_getenv:
+            # Return None for JMAP_HOST, but test_token for JMAP_API_TOKEN_RW
+            def getenv_side_effect(key, default=None):
+                if key == 'JMAP_HOST':
+                    return None
+                elif key == 'JMAP_API_TOKEN_RW':
+                    return 'test_token'
+                return default
 
-        with pytest.raises(ValueError, match='JMAP_HOST environment variable is required'):
-            load_jmap_credentials_rw()
+            mock_getenv.side_effect = getenv_side_effect
 
-    def test_load_credentials_missing_token(self, monkeypatch, mock_load_dotenv):
+            with pytest.raises(ValueError, match='JMAP_HOST environment variable is required'):
+                load_jmap_credentials_rw()
+
+    def test_load_credentials_missing_token(self, mock_load_dotenv):
         """Test error when JMAP_API_TOKEN_RW is missing."""
-        monkeypatch.setenv('JMAP_HOST', 'api.example.com')
-        monkeypatch.delenv('JMAP_API_TOKEN_RW', raising=False)
+        with patch('os.getenv') as mock_getenv:
+            # Return api.example.com for JMAP_HOST, but None for JMAP_API_TOKEN_RW
+            def getenv_side_effect(key, default=None):
+                if key == 'JMAP_HOST':
+                    return 'api.example.com'
+                elif key == 'JMAP_API_TOKEN_RW':
+                    return None
+                return default
 
-        with pytest.raises(ValueError, match='JMAP_API_TOKEN_RW environment variable is required'):
-            load_jmap_credentials_rw()
+            mock_getenv.side_effect = getenv_side_effect
+
+            with pytest.raises(ValueError, match='JMAP_API_TOKEN_RW environment variable is required'):
+                load_jmap_credentials_rw()
 
 
 class TestCreateFolder:

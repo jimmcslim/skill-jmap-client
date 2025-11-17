@@ -231,29 +231,45 @@ class TestLoadJMAPCredentials:
 
         assert host == 'api.example.com'
 
-    def test_load_credentials_missing_host(self, monkeypatch, capsys, mock_load_dotenv):
+    def test_load_credentials_missing_host(self, capsys, mock_load_dotenv):
         """Test error when JMAP_HOST is missing."""
-        monkeypatch.delenv('JMAP_HOST', raising=False)
-        monkeypatch.setenv('JMAP_API_TOKEN_RO', 'test_token')
+        with patch('os.getenv') as mock_getenv:
+            # Return None for JMAP_HOST, but test_token for JMAP_API_TOKEN_RO
+            def getenv_side_effect(key, default=None):
+                if key == 'JMAP_HOST':
+                    return None
+                elif key == 'JMAP_API_TOKEN_RO':
+                    return 'test_token'
+                return default
 
-        with pytest.raises(SystemExit) as exc_info:
-            load_jmap_credentials()
+            mock_getenv.side_effect = getenv_side_effect
 
-        assert exc_info.value.code == 1
-        captured = capsys.readouterr()
-        assert 'Missing JMAP credentials' in captured.out
+            with pytest.raises(SystemExit) as exc_info:
+                load_jmap_credentials()
 
-    def test_load_credentials_missing_token(self, monkeypatch, capsys, mock_load_dotenv):
+            assert exc_info.value.code == 1
+            captured = capsys.readouterr()
+            assert 'Missing JMAP credentials' in captured.out
+
+    def test_load_credentials_missing_token(self, capsys, mock_load_dotenv):
         """Test error when JMAP_API_TOKEN_RO is missing."""
-        monkeypatch.setenv('JMAP_HOST', 'api.example.com')
-        monkeypatch.delenv('JMAP_API_TOKEN_RO', raising=False)
+        with patch('os.getenv') as mock_getenv:
+            # Return api.example.com for JMAP_HOST, but None for JMAP_API_TOKEN_RO
+            def getenv_side_effect(key, default=None):
+                if key == 'JMAP_HOST':
+                    return 'api.example.com'
+                elif key == 'JMAP_API_TOKEN_RO':
+                    return None
+                return default
 
-        with pytest.raises(SystemExit) as exc_info:
-            load_jmap_credentials()
+            mock_getenv.side_effect = getenv_side_effect
 
-        assert exc_info.value.code == 1
-        captured = capsys.readouterr()
-        assert 'Missing JMAP credentials' in captured.out
+            with pytest.raises(SystemExit) as exc_info:
+                load_jmap_credentials()
+
+            assert exc_info.value.code == 1
+            captured = capsys.readouterr()
+            assert 'Missing JMAP credentials' in captured.out
 
 
 class TestFormatEmailAddress:
