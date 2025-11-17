@@ -368,7 +368,9 @@ Use --copy to keep the email in its current location as well.
         success = file_email(client, args.email_id, target_id, copy=args.copy)
         if success:
             print(f"\n{'='*80}")
-            print(f"SUCCESS: Email {operation}d")
+            # Format operation properly (move -> moved, copy -> copied)
+            operation_past = 'copied' if args.copy else 'moved'
+            print(f"SUCCESS: Email {operation_past}")
             print(f"{'='*80}")
             print(f"Email: {email_info['subject'][:60]}")
             print(f"Filed to: {para_parent}/{args.folder_name}")
