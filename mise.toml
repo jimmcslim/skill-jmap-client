@@ -1,0 +1,30 @@
+# mise configuration for skill-jmap-client
+# https://mise.jdx.dev/
+
+[tools]
+python = "3.11"
+
+[tasks.test]
+description = "Run pytest tests with uv"
+run = "uv run --extra test pytest tests/ -v"
+
+[tasks."test:watch"]
+description = "Run tests in watch mode"
+run = "uv run --extra test pytest-watch tests/"
+depends = ["test"]
+
+[tasks."test:coverage"]
+description = "Run tests with coverage report"
+run = "uv run --extra test pytest tests/ --cov=. --cov-report=html --cov-report=term"
+
+[tasks.install]
+description = "Install dependencies with uv"
+run = "uv sync --extra test"
+
+[tasks.format]
+description = "Format code with black"
+run = "uv run --with black black *.py tests/"
+
+[tasks.lint]
+description = "Lint code with ruff"
+run = "uv run --with ruff ruff check *.py tests/"
