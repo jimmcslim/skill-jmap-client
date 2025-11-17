@@ -4,7 +4,6 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 from jmap_file_email import (
-    load_jmap_credentials_rw,
     find_folder_in_para,
     get_email_info,
     file_email,
@@ -187,8 +186,6 @@ class TestFileEmail:
         result = file_email(client, 'email_123', 'target_mailbox_id', copy=False)
 
         assert result is True
-        # Verify request was made with correct mailboxIds (only target)
-        call_args = mock_client.client.request.call_args
         # Should NOT have called get_email_info for move
         mock_get_email_info.assert_not_called()
 

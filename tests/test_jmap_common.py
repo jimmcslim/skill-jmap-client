@@ -1,9 +1,7 @@
 """Tests for jmap_common.py module."""
 
 import pytest
-import sys
-from unittest.mock import patch, MagicMock
-from datetime import datetime
+from unittest.mock import patch
 
 from jmap_common import (
     JMAPClient,

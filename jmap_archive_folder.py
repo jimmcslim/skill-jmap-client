@@ -18,7 +18,7 @@ Uses a read-write API token for modification operations.
 import argparse
 import os
 import sys
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 from jmap_common import JMAPClient
 from jmapc.methods import MailboxSet
@@ -173,7 +173,7 @@ The script will:
         sys.exit(1)
 
     # Find the archive folder
-    print(f"Looking for archive folder '400_archives'...")
+    print("Looking for archive folder '400_archives'...")
     archive_folder = client.get_mailbox_by_name('400_archives')
 
     if not archive_folder:
@@ -222,7 +222,7 @@ The script will:
     # Confirm the move
     print(f"Ready to archive '{args.folder_name}'")
     print(f"  From: {para_parent}")
-    print(f"  To: 400_archives")
+    print("  To: 400_archives")
     print()
 
     if not args.yes:
@@ -235,7 +235,7 @@ The script will:
         print()
 
     # Move the folder
-    print(f"\nArchiving folder...")
+    print("\nArchiving folder...")
     try:
         success = move_folder_to_archive(client, folder_id, archive_id)
         if success:
@@ -244,7 +244,7 @@ The script will:
             print(f"{'='*80}")
             print(f"Folder: {args.folder_name}")
             print(f"Moved from: {para_parent}")
-            print(f"Moved to: 400_archives")
+            print("Moved to: 400_archives")
             print(f"{'='*80}")
         else:
             print("\nError: Move operation did not complete successfully")

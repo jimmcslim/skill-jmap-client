@@ -32,7 +32,7 @@ class JMAPClient:
                 api_token=self.api_token
             )
 
-            print(f"✓ Connected successfully")
+            print("✓ Connected successfully")
             print(f"  API URL: https://{self.host}\n")
 
         except Exception as e:
@@ -229,5 +229,5 @@ def format_datetime(dt_str: str) -> str:
     try:
         dt = datetime.fromisoformat(dt_str.replace('Z', '+00:00'))
         return dt.strftime('%Y-%m-%d %H:%M:%S %Z')
-    except:
+    except (ValueError, AttributeError):
         return dt_str

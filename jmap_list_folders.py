@@ -20,7 +20,6 @@ from jmap_common import JMAPClient, load_jmap_credentials
 
 def build_folder_tree(mailboxes: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
     """Build a tree structure from flat mailbox list."""
-    tree = {'root': []}
     children_map = {}
 
     # Group mailboxes by parent
@@ -116,7 +115,7 @@ def display_folders(
     else:
         # Show all root folders
         print(f"{'='*80}")
-        print(f"Folder Hierarchy")
+        print("Folder Hierarchy")
         print(f"Found {len(mailboxes)} folder(s)")
         if max_depth is not None:
             print(f"Maximum depth: {max_depth}")

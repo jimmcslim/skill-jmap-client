@@ -37,7 +37,7 @@ def display_email_detail(email: Dict[str, Any]) -> None:
     """Display full email details in a readable format."""
 
     print(f"{'='*80}")
-    print(f"EMAIL DETAILS")
+    print("EMAIL DETAILS")
     print(f"{'='*80}\n")
 
     # Basic metadata
