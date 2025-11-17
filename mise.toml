@@ -2,7 +2,7 @@
 # https://mise.jdx.dev/
 
 [tools]
-python = "3.11"
+python = "system"
 
 [tasks.test]
 description = "Run pytest tests with uv"
