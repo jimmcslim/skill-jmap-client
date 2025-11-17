@@ -295,7 +295,7 @@ Use --copy to keep the email in its current location as well.
         print(f"Error: {e}")
         sys.exit(1)
 
-    print(f"✓ Found email")
+    print("✓ Found email")
     print(f"  Subject: {email_info['subject']}")
     if email_info['from']:
         from_addr = email_info['from'][0]
@@ -306,7 +306,7 @@ Use --copy to keep the email in its current location as well.
     # Show current mailboxes
     current_mailboxes = list(email_info['mailboxIds'].keys())
     if current_mailboxes:
-        print(f"  Current location(s):")
+        print("  Current location(s):")
         for mb_id in current_mailboxes:
             mb_name = get_mailbox_name(client, mb_id)
             print(f"    - {mb_name}")
@@ -331,7 +331,7 @@ Use --copy to keep the email in its current location as well.
         print("  - 300_resources")
         print("\nUse jmap_list_folders.py to see available folders")
         if args.max_depth is not None:
-            print(f"Or try without --max-depth to search the entire hierarchy")
+            print("Or try without --max-depth to search the entire hierarchy")
         sys.exit(1)
 
     target_id = target_folder['id']
@@ -348,9 +348,9 @@ Use --copy to keep the email in its current location as well.
     print(f"  Email: {email_info['subject'][:60]}")
     print(f"  To: {para_parent}/{args.folder_name}")
     if args.copy:
-        print(f"  Note: Email will remain in current location(s)")
+        print("  Note: Email will remain in current location(s)")
     else:
-        print(f"  Note: Email will be removed from current location(s)")
+        print("  Note: Email will be removed from current location(s)")
     print()
 
     if not args.yes:
@@ -363,7 +363,7 @@ Use --copy to keep the email in its current location as well.
         print()
 
     # File the email
-    print(f"\nFiling email...")
+    print("\nFiling email...")
     try:
         success = file_email(client, args.email_id, target_id, copy=args.copy)
         if success:
@@ -375,12 +375,12 @@ Use --copy to keep the email in its current location as well.
             print(f"Email: {email_info['subject'][:60]}")
             print(f"Filed to: {para_parent}/{args.folder_name}")
             if args.copy:
-                print(f"Operation: Copied (kept in original location)")
+                print("Operation: Copied (kept in original location)")
             else:
-                print(f"Operation: Moved (removed from original location)")
+                print("Operation: Moved (removed from original location)")
             print(f"{'='*80}")
         else:
-            print(f"\nError: Filing operation did not complete successfully")
+            print("\nError: Filing operation did not complete successfully")
             sys.exit(1)
     except ValueError as e:
         print(f"\nError: {e}")

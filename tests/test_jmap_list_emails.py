@@ -1,6 +1,5 @@
 """Tests for jmap_list_emails.py script."""
 
-import pytest
 import json
 from unittest.mock import patch, MagicMock
 
@@ -47,12 +46,6 @@ class TestDisplayEmails:
         # First email is read ($seen keyword)
         assert 'Status: READ' in captured.out
         # Second email is unread (no $seen keyword) and flagged
-        output_lines = captured.out.split('\n')
-        # Find the line for email 2
-        email_2_section = '\n'.join([
-            line for i, line in enumerate(output_lines)
-            if 'Test Email 2' in line or (i > 0 and 'Test Email 2' in output_lines[i-1])
-        ])
         # Email 2 should show UNREAD and FLAGGED
         assert 'UNREAD' in captured.out
         assert 'FLAGGED' in captured.out

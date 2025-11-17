@@ -2,10 +2,8 @@
 
 import pytest
 from unittest.mock import patch, MagicMock
-from io import StringIO
 
 from jmap_archive_folder import (
-    load_jmap_credentials_rw,
     find_folder_in_para,
     move_folder_to_archive,
     main,

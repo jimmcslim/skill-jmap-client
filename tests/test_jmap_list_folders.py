@@ -1,8 +1,6 @@
 """Tests for jmap_list_folders.py script."""
 
-import pytest
 from unittest.mock import patch, MagicMock
-import sys
 
 from jmap_list_folders import (
     build_folder_tree,

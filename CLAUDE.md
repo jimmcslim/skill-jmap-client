@@ -7,7 +7,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 **Purpose**: A Claude Code skill for managing emails using the JMAP (JSON Meta Application Protocol) standard, optimized for the PARA (Projects, Areas, Resources, Archives) organizational method.
 
 **Technology Stack**:
-- Python 3.8+
+- Python 3.12+
 - PEP 723 inline script metadata for dependency management
 - `uv` package manager for execution
 - `jmapc` library (type-safe Python JMAP client)

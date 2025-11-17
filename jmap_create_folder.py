@@ -20,7 +20,7 @@ Uses a read-write API token for modification operations.
 import argparse
 import os
 import sys
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from dotenv import load_dotenv
 from jmap_common import JMAPClient
 from jmapc.methods import MailboxSet
