@@ -14,6 +14,7 @@ Defaults to Inbox if no folder is specified.
 """
 
 import argparse
+import json
 from typing import List, Dict, Any
 from jmap_common import (
     JMAPClient,
@@ -84,6 +85,26 @@ def display_emails(emails: List[Dict[str, Any]], folder_name: str, show_ids: boo
         print(f"{'-'*80}\n")
 
 
+def display_emails_json(emails: List[Dict[str, Any]], folder_name: str, show_ids: bool = False) -> None:
+    """Display emails in JSON format."""
+    # Filter out IDs if not requested
+    if not show_ids:
+        emails_output = []
+        for email in emails:
+            email_copy = email.copy()
+            email_copy.pop('id', None)
+            emails_output.append(email_copy)
+    else:
+        emails_output = emails
+
+    output = {
+        'folder': folder_name,
+        'count': len(emails),
+        'emails': emails_output
+    }
+    print(json.dumps(output, indent=2, ensure_ascii=False))
+
+
 def main():
     """Main function."""
     parser = argparse.ArgumentParser(
@@ -94,6 +115,8 @@ Examples:
   %(prog)s                          # List emails from Inbox
   %(prog)s --folder "Sent Items"    # List emails from Sent Items
   %(prog)s --folder Inbox --limit 20  # List 20 emails from Inbox
+  %(prog)s --json                   # Output emails in JSON format
+  %(prog)s --folder Inbox --json --show-ids  # JSON output with email IDs
         """
     )
     parser.add_argument(
@@ -112,6 +135,11 @@ Examples:
         '--show-ids',
         action='store_true',
         help='Show email IDs in the output'
+    )
+    parser.add_argument(
+        '--json',
+        action='store_true',
+        help='Output in JSON format instead of formatted text'
     )
     args = parser.parse_args()
 
@@ -149,11 +177,15 @@ Examples:
     mailbox_name = mailbox.get('name', args.folder)
     mailbox_id = mailbox.get('id')
 
-    print(f"Fetching {args.limit} most recent emails from '{mailbox_name}'...\n")
-
-    # Get and display emails
+    # Get emails
     emails = client.get_emails(mailbox_id=mailbox_id, limit=args.limit)
-    display_emails(emails, mailbox_name, show_ids=args.show_ids)
+
+    # Display in requested format
+    if args.json:
+        display_emails_json(emails, mailbox_name, show_ids=args.show_ids)
+    else:
+        print(f"Fetching {args.limit} most recent emails from '{mailbox_name}'...\n")
+        display_emails(emails, mailbox_name, show_ids=args.show_ids)
 
 
 if __name__ == "__main__":
